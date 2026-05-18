@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>BookStack - Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #e0f2f7; /* Light blue background */
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column; /* Allow content to stack */
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh; /* Full viewport height */
+      margin: 0;
+      padding-top: 50px; /* Space for the header */
+    }
+    .header-brand {
+        margin-bottom: 30px;
+        color: #007bff;
+        display: flex;
+        align-items: center;
+        font-size: 2.2rem;
+        font-weight: bold;
+    }
+    .header-brand img {
+        height: 50px;
+        margin-right: 15px;
+    }
+    .login-container {
+      background-color: #fff;
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-container h2 {
+      color: #007bff;
+      margin-bottom: 30px;
+      font-weight: bold;
+    }
+    .form-control {
+      border-radius: 8px;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      width: 100%;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .btn-link {
+      color: #007bff;
+      text-decoration: none;
+    }
+    .btn-link:hover {
+      text-decoration: underline;
+    }
+    /* Styles for custom message box */
+    .custom-message-box {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 1050; /* Ensure it's above everything */
+        max-width: 400px;
+        width: 90%; /* Responsive width */
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+    .custom-message-box.show {
+        opacity: 1;
+    }
+    .custom-message-box .btn-close {
+        color: inherit; /* Use alert's text color */
+        opacity: 0.8;
+    }
+    .custom-message-box.alert-success { background-color: #d4edda; color: #155724; border-color: #c3e6cb; }
+    .custom-message-box.alert-info    { background-color: #d1ecf1; color: #0c5460; border-color: #bee5eb; }
+    .custom-message-box.alert-warning { background-color: #fff3cd; color: #856404; border-color: #ffeeba; }
+    .custom-message-box.alert-danger  { background-color: #f8d7da; color: #721c24; border-color: #f5c6cb; }
+    .custom-message-box.alert-primary { background-color: #cce5ff; color: #004085; border-color: #b8daff; }
+  </style>
+</head>
+<body>
+
+<div class="header-brand">
+    <img src="logo.png" alt="BookStack Logo" />
+    BookStack
+</div>
+
+<div class="login-container">
+  <h2>Login to BookStack</h2>
+  <form id="loginForm">
+    <div class="mb-3">
+      <input type="email" class="form-control" id="loginEmail" placeholder="Email (e.g., user@example.com)" required />
+    </div>
+    <div class="mb-4">
+      <input type="password" class="form-control" id="loginPassword" placeholder="Password (e.g., password123)" required />
+    </div>
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+  <p class="mt-3">Don't have an account? <a href="register.html" class="btn-link">Register here</a></p>
+</div>
+
+<!-- Custom Message Box Container -->
+<div id="messageBoxContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Get references to key DOM elements
+  const loginForm = document.getElementById('loginForm');
+  const messageBoxContainer = document.getElementById('messageBoxContainer');
+
+  // Event listener for Login Form Submission
+  loginForm.addEventListener('submit', function(event) {
+    event.preventDefault(); // Prevent the browser's default form submission
+
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    // Simulate login success. In a real app, validate credentials against a backend.
+    if (email === 'user@example.com' && password === 'password123') { // Simple hardcoded check
+      const username = email.split('@')[0];
+      displayMessage('Logged in successfully! Redirecting...', 'alert-success');
+      setTimeout(() => {
+        // Redirect to index.html with loggedIn flag and username
+        window.location.href = `index.html?loggedIn=true&username=${encodeURIComponent(username)}`;
+      }, 1000); // Redirect after 1 second
+    } else {
+      displayMessage('Invalid email or password.', 'alert-danger');
+    }
+  });
+
+  /**
+   * Displays a custom message box instead of native alert().
+   * Appends it to the body and removes after a delay.
+   * @param {string} message - The message to display.
+   * @param {string} type - Bootstrap alert type (e.g., 'alert-success', 'alert-info', 'alert-danger').
+   */
+  function displayMessage(message, type = 'alert-info') {
+    const messageBox = document.createElement('div');
+    messageBox.className = `custom-message-box alert ${type}`;
+    messageBox.innerHTML = `
+      <span>${message}</span>
+      <button type="button" class="btn-close" aria-label="Close"></button>
+    `;
+
+    messageBoxContainer.appendChild(messageBox); // Append to the dedicated container
+
+    // Add event listener to close button
+    messageBox.querySelector('.btn-close').addEventListener('click', () => {
+      messageBox.classList.remove('show');
+      messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
+    });
+
+    // Show with fade effect
+    setTimeout(() => messageBox.classList.add('show'), 10); // Small delay for transition
+
+    // Hide after a delay
+    setTimeout(() => {
+      messageBox.classList.remove('show');
+      messageBox.addEventListener('transitionend', () => messageBox.remove(), { once: true });
+    }, 3000); // Message disappears after 3 seconds
+  }
+</script>
+</body>
+</html>
