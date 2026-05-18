@@ -4,6 +4,10 @@ from flask_cors import CORS
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import re
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
+import requests
+from bs4 import BeautifulSoup
+from urllib.parse import urlparse, urlunparse
+from utils import normalize_url
 
 # Import db, User, Tag, Bookmark, and bookmark_tags from the models file
 from models import db, User, Tag, Bookmark, bookmark_tags
@@ -29,6 +33,8 @@ def validate_url(url):
         re.IGNORECASE
     )
     return re.match(regex, url) is not None
+
+
 
 # Route for serving the frontend's index.html
 @app.route('/')
@@ -138,6 +144,13 @@ def bookmarks():
         if not url or not validate_url(url):
             return jsonify({'error': 'Invalid URL format or missing URL'}), 400
 
+        normalized_url = normalize_url(url)
+
+        # Duplicate check
+        existing_bookmark = Bookmark.query.filter_by(user_id=user_id, url=normalized_url).first()
+        if existing_bookmark:
+            return jsonify({'error': 'Already bookmarked'}), 409
+
         try:
             tags = []
             for name in tag_names:
@@ -152,8 +165,10 @@ def bookmarks():
             bookmark = Bookmark(
                 user_id=user_id,
                 title=title,
-                url=url,
-                description=notes
+                url=normalized_url,
+                description=notes,
+                favicon_url=data.get('favicon_url'),
+                image_url=data.get('image_url')
             )
             bookmark.tags = tags
             db.session.add(bookmark)
@@ -254,6 +269,78 @@ def search():
         return jsonify([b.to_dict() for b in bookmarks_found]), 200
     except SQLAlchemyError:
         return jsonify({'error': 'Failed to search bookmarks'}), 500
+
+# ----------- Metadata Endpoint ------------
+@app.route('/api/metadata', methods=['GET'])
+@jwt_required()
+def fetch_metadata():
+    url = request.args.get('url')
+    if not url or not validate_url(url):
+        return jsonify({'error': 'Invalid or missing URL'}), 400
+        
+    normalized_url = normalize_url(url)
+        
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+    }
+    
+    try:
+        response = requests.get(normalized_url, headers=headers, timeout=5)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.content, 'html.parser')
+        
+        # 1. Title
+        title_tag = soup.find('title')
+        title = title_tag.string.strip() if title_tag and title_tag.string else ''
+        if not title:
+            og_title = soup.find('meta', property='og:title')
+            if og_title and og_title.get('content'):
+                title = og_title['content'].strip()
+                
+        # 2. Description
+        description = ''
+        meta_desc = soup.find('meta', attrs={'name': 'description'})
+        if meta_desc and meta_desc.get('content'):
+            description = meta_desc['content'].strip()
+        else:
+            og_desc = soup.find('meta', property='og:description')
+            if og_desc and og_desc.get('content'):
+                description = og_desc['content'].strip()
+                
+        # 3. Open Graph Image
+        image_url = ''
+        og_image = soup.find('meta', property='og:image')
+        if og_image and og_image.get('content'):
+            image_url = og_image['content'].strip()
+            
+        # 4. Favicon
+        favicon_url = ''
+        icon_link = soup.find('link', rel=lambda r: r and 'icon' in r.lower())
+        if icon_link and icon_link.get('href'):
+            favicon_url = icon_link['href']
+        else:
+            favicon_url = '/favicon.ico'
+            
+        # Make favicon/image URLs absolute if they are relative
+        from urllib.parse import urljoin
+        if image_url:
+            image_url = urljoin(normalized_url, image_url)
+        if favicon_url:
+            favicon_url = urljoin(normalized_url, favicon_url)
+
+        return jsonify({
+            'title': title,
+            'description': description,
+            'favicon_url': favicon_url,
+            'image_url': image_url,
+            'normalized_url': normalized_url
+        }), 200
+        
+    except requests.exceptions.RequestException as e:
+        return jsonify({'error': 'Failed to fetch metadata', 'details': str(e)}), 502
+    except Exception as e:
+        return jsonify({'error': 'Error processing metadata', 'details': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

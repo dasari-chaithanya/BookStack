@@ -127,16 +127,23 @@ export default function Navbar({ onLogoutClick, searchValue, onSearchChange }) {
                         className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-blue-50 overflow-hidden py-1"
                       >
                         <button
-                          disabled
-                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-500 cursor-not-allowed opacity-60"
+                          onClick={() => { setDropdownOpen(false); navigate('/dashboard') }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150"
                         >
-                          <FiUser className="w-4 h-4" /> Profile
+                          <FiBookmark className="w-4 h-4" /> Dashboard
+                        </button>
+                        <button
+                          onClick={() => { setDropdownOpen(false); navigate('/settings') }}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150"
+                        >
+                          <FiSettings className="w-4 h-4" /> Settings
                         </button>
                         <button
                           disabled
-                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-500 cursor-not-allowed opacity-60"
+                          title="Coming soon"
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed"
                         >
-                          <FiSettings className="w-4 h-4" /> Settings
+                          <FiUser className="w-4 h-4" /> Export Bookmarks
                         </button>
                         <div className="my-1 border-t border-gray-100" />
                         <button
@@ -211,11 +218,21 @@ export default function Navbar({ onLogoutClick, searchValue, onSearchChange }) {
                     <p className="text-xs text-gray-500">Logged in</p>
                   </div>
                 </div>
-                <button className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-500 opacity-60 cursor-not-allowed">
-                  <FiUser className="w-4 h-4" /> Profile
+                <button 
+                  onClick={() => { setMobileOpen(false); navigate('/dashboard') }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 rounded-xl transition-colors">
+                  <FiBookmark className="w-4 h-4" /> Dashboard
                 </button>
-                <button className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-500 opacity-60 cursor-not-allowed">
+                <button 
+                  onClick={() => { setMobileOpen(false); navigate('/settings') }}
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 rounded-xl transition-colors">
                   <FiSettings className="w-4 h-4" /> Settings
+                </button>
+                <button 
+                  disabled
+                  title="Coming soon"
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-400 cursor-not-allowed rounded-xl">
+                  <FiUser className="w-4 h-4" /> Export Bookmarks
                 </button>
                 <div className="my-1 border-t border-gray-100" />
                 <button

@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiX, FiBookmark, FiLink, FiTag, FiFileText, FiLoader } from 'react-icons/fi'
+import { FiX, FiBookmark, FiLink, FiTag, FiFileText, FiLoader, FiCheckCircle } from 'react-icons/fi'
+import client from '../api/client'
 
-const EMPTY = { title: '', url: '', description: '', tags: '' }
+const EMPTY = { title: '', url: '', description: '', tags: '', favicon_url: '', image_url: '' }
 
 export default function BookmarkModal({ isOpen, onClose, onSave, editData = null }) {
   const [form, setForm] = useState(EMPTY)
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(false)
+  const [fetchingMetadata, setFetchingMetadata] = useState(false)
+  const [metadataSuccess, setMetadataSuccess] = useState(false)
 
   // Populate form when editing
   useEffect(() => {
@@ -17,12 +20,55 @@ export default function BookmarkModal({ isOpen, onClose, onSave, editData = null
         url: editData.url || '',
         description: editData.notes || '',
         tags: editData.tags ? editData.tags.join(', ') : '',
+        favicon_url: editData.favicon_url || '',
+        image_url: editData.image_url || '',
       })
     } else {
       setForm(EMPTY)
     }
     setErrors({})
+    setMetadataSuccess(false)
   }, [editData, isOpen])
+
+  // Debounced Auto Metadata Fetch
+  useEffect(() => {
+    if (editData || !form.url) {
+      setMetadataSuccess(false)
+      return
+    }
+
+    let isValidUrl = false
+    try {
+      new URL(form.url)
+      isValidUrl = true
+    } catch {
+      isValidUrl = false
+    }
+
+    if (!isValidUrl) return
+
+    const delayDebounceFn = setTimeout(async () => {
+      setFetchingMetadata(true)
+      setMetadataSuccess(false)
+      try {
+        const res = await client.get(`/api/metadata?url=${encodeURIComponent(form.url)}`)
+        setForm(prev => ({
+          ...prev,
+          title: prev.title || res.data.title || '',
+          description: prev.description || res.data.description || '',
+          favicon_url: res.data.favicon_url || '',
+          image_url: res.data.image_url || ''
+        }))
+        setMetadataSuccess(true)
+      } catch (err) {
+        console.error('Failed to fetch metadata:', err)
+      } finally {
+        setFetchingMetadata(false)
+      }
+    }, 800)
+
+    return () => clearTimeout(delayDebounceFn)
+  }, [form.url, editData])
 
   // Close on Escape
   useEffect(() => {
@@ -63,19 +109,26 @@ export default function BookmarkModal({ isOpen, onClose, onSave, editData = null
         {label}
       </label>
       <div className="relative">
-        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Icon className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${errors[name] ? 'text-red-400' : 'text-gray-400'}`} />
         <input
           type={type}
           value={form[name]}
           onChange={(e) => {
             setForm((f) => ({ ...f, [name]: e.target.value }))
             setErrors((e2) => ({ ...e2, [name]: undefined }))
+            if (name === 'url') setMetadataSuccess(false)
           }}
           placeholder={placeholder}
-          className={`w-full pl-10 pr-4 py-2.5 rounded-xl border text-sm text-gray-800 placeholder-gray-400 transition-all duration-200 ${
-            errors[name] ? 'border-red-400 bg-red-50' : 'border-blue-100 bg-blue-50/40 focus:bg-white focus:border-blue-400'
+          className={`w-full pl-10 ${name === 'url' ? 'pr-10' : 'pr-4'} py-2.5 rounded-xl border text-sm text-gray-800 placeholder-gray-400 transition-all duration-200 ${
+            errors[name] ? 'border-red-400 bg-red-50 focus:border-red-500 focus:bg-white' : 'border-blue-100 bg-blue-50/40 focus:bg-white focus:border-blue-400'
           }`}
         />
+        {name === 'url' && (
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 flex items-center">
+            {fetchingMetadata && <FiLoader className="w-4 h-4 text-blue-500 animate-spin" />}
+            {!fetchingMetadata && metadataSuccess && <FiCheckCircle className="w-4 h-4 text-emerald-500" />}
+          </div>
+        )}
       </div>
       {errors[name] && (
         <p className="text-xs text-red-500">{errors[name]}</p>

@@ -21,6 +21,10 @@ client.interceptors.request.use((config) => {
 client.interceptors.response.use(
   (res) => res,
   (err) => {
+    if (err?.response?.status === 401) {
+      window.dispatchEvent(new CustomEvent('auth-expired'))
+    }
+
     const msg =
       err?.response?.data?.error ||
       err?.response?.data?.message ||

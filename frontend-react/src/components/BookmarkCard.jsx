@@ -32,7 +32,7 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
     window.open(bookmark.url, '_blank', 'noopener,noreferrer')
   }
 
-  const favicon = getFaviconUrl(bookmark.url)
+  const favicon = bookmark.favicon_url || getFaviconUrl(bookmark.url)
   const domain = getDomainName(bookmark.url)
 
   return (
@@ -43,10 +43,15 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
-      className="group bg-white rounded-2xl border border-blue-50 card-shadow hover:card-shadow-hover transition-all duration-300 overflow-hidden flex flex-col"
     >
-      {/* Top accent bar */}
-      <div className="h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
+      {/* Top accent bar or Preview Image */}
+      {bookmark.image_url ? (
+        <div className="h-32 w-full overflow-hidden bg-gray-100 border-b border-blue-50">
+          <img src={bookmark.image_url} alt="Preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        </div>
+      ) : (
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
+      )}
 
       <div className="p-5 flex flex-col gap-3 flex-1">
         {/* Header: favicon + title */}
@@ -89,9 +94,9 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
 
         {/* Tags */}
         {bookmark.tags && bookmark.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap gap-1.5 overflow-hidden">
             {bookmark.tags.map((tag) => (
-              <span key={tag} className="tag-pill">{tag}</span>
+              <span key={tag} className="tag-pill max-w-full truncate inline-block" title={tag}>{tag}</span>
             ))}
           </div>
         )}

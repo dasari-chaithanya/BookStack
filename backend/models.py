@@ -4,8 +4,8 @@ from datetime import datetime
 db = SQLAlchemy()
 
 bookmark_tags = db.Table('bookmark_tags',
-    db.Column('bookmark_id', db.Integer, db.ForeignKey('bookmark.id'), primary_key=True),
-    db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
+    db.Column('bookmark_id', db.Integer, db.ForeignKey('bookmarks.id'), primary_key=True),
+    db.Column('tag_id', db.Integer, db.ForeignKey('tags.id'), primary_key=True)
 )
 
 class User(db.Model):
@@ -30,6 +30,8 @@ class Bookmark(db.Model):
     title = db.Column(db.String(200), nullable=False)
     url = db.Column(db.String(500), nullable=False)
     description = db.Column(db.Text)
+    favicon_url = db.Column(db.String(500), nullable=True)
+    image_url = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     tags = db.relationship('Tag', secondary=bookmark_tags, backref=db.backref('bookmarks_associated', lazy='dynamic'))
@@ -40,6 +42,8 @@ class Bookmark(db.Model):
             "title": self.title,
             "url": self.url,
             "notes": self.description,
+            "favicon_url": self.favicon_url,
+            "image_url": self.image_url,
             "tags": [t.name for t in self.tags],
             "created_at": self.created_at.strftime("%Y-%m-%d %H:%M:%S") if self.created_at else None
         }

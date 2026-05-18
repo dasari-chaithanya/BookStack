@@ -6,6 +6,7 @@ import BookmarkModal from '../components/BookmarkModal'
 import FloatingActionButton from '../components/FloatingActionButton'
 import { FiSearch, FiInbox, FiTag, FiHash } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
+import { useMemo } from 'react'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -17,10 +18,24 @@ export default function DashboardPage() {
   const [activeTag, setActiveTag] = useState('')
   const [allTags, setAllTags] = useState([])
 
-  // Fetch bookmarks on mount or filter change
+  // Fetch bookmarks on mount only
   useEffect(() => {
-    fetchBookmarks(searchQuery, activeTag)
-  }, [fetchBookmarks, searchQuery, activeTag])
+    fetchBookmarks('', '')
+  }, [fetchBookmarks])
+
+  // Instant frontend filtering
+  const filteredBookmarks = useMemo(() => {
+    return bookmarks.filter(b => {
+      const matchesSearch = !searchQuery || 
+        b.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        b.url.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        (b.notes && b.notes.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesTag = !activeTag || (b.tags && b.tags.includes(activeTag));
+      
+      return matchesSearch && matchesTag;
+    })
+  }, [bookmarks, searchQuery, activeTag])
 
   // Extract all unique tags
   useEffect(() => {
@@ -43,11 +58,17 @@ export default function DashboardPage() {
     setModalOpen(true)
   }
 
-  const handleSave = async (data) => {
     if (editingBookmark) {
       await updateBookmark(editingBookmark.id, data)
     } else {
-      await addBookmark(data)
+      try {
+        await addBookmark(data)
+      } catch (e) {
+        if (e.response?.status === 409) {
+          throw new Error("Already bookmarked")
+        }
+        throw e
+      }
     }
     setModalOpen(false)
   }
@@ -109,10 +130,27 @@ export default function DashboardPage() {
 
       {/* Content */}
       {loading && bookmarks.length === 0 ? (
-        <div className="flex justify-center py-20">
-          <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+            <div key={n} className="bg-white rounded-2xl border border-blue-50 overflow-hidden flex flex-col h-48 animate-pulse">
+              <div className="h-1 bg-gray-200" />
+              <div className="p-5 flex flex-col gap-4">
+                <div className="flex gap-3 items-start">
+                  <div className="w-9 h-9 rounded-xl bg-gray-200" />
+                  <div className="flex-1 space-y-2 py-1">
+                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                    <div className="h-3 bg-gray-200 rounded w-1/2" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      ) : bookmarks.length === 0 ? (
+      ) : filteredBookmarks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mb-4 border border-blue-100">
             <FiInbox className="w-8 h-8 text-blue-300" />
@@ -135,7 +173,7 @@ export default function DashboardPage() {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           <AnimatePresence>
-            {bookmarks.map((bookmark) => (
+            {filteredBookmarks.map((bookmark) => (
               <motion.div
                 key={bookmark.id}
                 layout
