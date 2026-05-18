@@ -99,21 +99,21 @@ export default function HeroSection() {
               </a>
             </motion.div>
 
-            {/* Stats row */}
+            {/* Feature Highlights */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.5 }}
-              className="flex items-center gap-8 pt-2 justify-center lg:justify-start"
+              className="flex items-center gap-6 pt-2 justify-center lg:justify-start flex-wrap"
             >
               {[
-                { value: '10K+', label: 'Users' },
-                { value: '500K+', label: 'Bookmarks Saved' },
-                { value: 'Free', label: 'Forever' },
+                { title: 'Smart', label: 'Organization' },
+                { title: 'Tag-Based', label: 'Filtering' },
+                { title: 'Secure', label: 'Storage' },
               ].map((s) => (
                 <div key={s.label} className="text-center lg:text-left">
-                  <p className="text-xl font-bold text-blue-600">{s.value}</p>
-                  <p className="text-xs text-gray-400">{s.label}</p>
+                  <p className="text-sm font-bold text-blue-600">{s.title}</p>
+                  <p className="text-xs text-gray-500 font-medium">{s.label}</p>
                 </div>
               ))}
             </motion.div>

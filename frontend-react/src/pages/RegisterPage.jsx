@@ -10,7 +10,7 @@ export default function RegisterPage() {
   const { addToast } = useToast()
   const navigate = useNavigate()
 
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ username: '', email: '', password: '' })
   const [errors, setErrors] = useState({})
   const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -18,6 +18,8 @@ export default function RegisterPage() {
   const validate = () => {
     const errs = {}
     if (!form.username.trim()) errs.username = 'Username is required.'
+    if (!form.email.trim())    errs.email = 'Email is required.'
+    else if (!/^\S+@\S+\.\S+$/.test(form.email)) errs.email = 'Email address is invalid.'
     if (!form.password)        errs.password = 'Password is required.'
     else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters.'
     return errs
@@ -30,7 +32,7 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      await register(form.username, null, form.password)
+      await register(form.username, form.email, form.password)
       addToast('Account created successfully! 🎉 Please log in.', 'success')
       navigate('/login')
     } catch (err) {
@@ -95,6 +97,27 @@ export default function RegisterPage() {
                   />
                 </div>
                 {errors.username && <p className="text-xs text-red-500">{errors.username}</p>}
+              </div>
+
+              {/* Email */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  Email
+                </label>
+                <div className="relative">
+                  <FiUser className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={form.email}
+                    onChange={set('email')}
+                    placeholder="you@example.com"
+                    autoComplete="email"
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border text-sm transition-all duration-200 ${
+                      errors.email ? 'border-red-400 bg-red-50' : 'border-blue-100 bg-blue-50/40 focus:bg-white focus:border-blue-400'
+                    }`}
+                  />
+                </div>
+                {errors.email && <p className="text-xs text-red-500">{errors.email}</p>}
               </div>
 
               {/* Password */}

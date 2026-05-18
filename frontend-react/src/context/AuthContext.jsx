@@ -4,31 +4,40 @@ import client from '../api/client'
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null)       // { username }
+  const [user, setUser] = useState(null)       // { username, email }
   const [loading, setLoading] = useState(true) // initial session check
 
   // Check session on mount
   useEffect(() => {
-    client.get('/api/status')
-      .then((res) => setUser({ username: res.data.username }))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false))
+    const token = localStorage.getItem('bookstack_token')
+    if (token) {
+      client.get('/api/status')
+        .then((res) => setUser({ username: res.data.username }))
+        .catch(() => {
+          setUser(null)
+          localStorage.removeItem('bookstack_token')
+        })
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
   }, [])
 
   const login = useCallback(async (username, password) => {
-    const res = await client.post('/api/login', { username, password })
-    setUser({ username: res.data.user.username })
+    const res = await client.post('/api/auth/login', { username, password })
+    localStorage.setItem('bookstack_token', res.data.token)
+    setUser({ username: res.data.user.username, email: res.data.user.email })
     return res.data
   }, [])
 
   const register = useCallback(async (username, email, password) => {
-    // Backend uses username + password; email stored client-side for display
-    const res = await client.post('/api/register', { username, password })
+    const res = await client.post('/api/auth/register', { username, email, password })
     return res.data
   }, [])
 
   const logout = useCallback(async () => {
-    await client.post('/api/logout')
+    // JWT logout: simply remove the token client-side
+    localStorage.removeItem('bookstack_token')
     setUser(null)
   }, [])
 

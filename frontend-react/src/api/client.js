@@ -8,6 +8,15 @@ const client = axios.create({
   },
 })
 
+// Request interceptor - inject JWT token
+client.interceptors.request.use((config) => {
+  const token = localStorage.getItem('bookstack_token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 // Response interceptor — normalize errors
 client.interceptors.response.use(
   (res) => res,
