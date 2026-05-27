@@ -51,24 +51,24 @@
 }
 
 [data-theme="focus"] {
-  /* Focus Mode - high contrast, operational, tight density */
-  --surface-base: #f4f4f5;
-  --surface-elevated: #ffffff;
-  --surface-overlay: #ffffff;
-  --surface-hover: #e4e4e7;
+  /* Focus Mode - deep, immersive dark mode for tight density */
+  --surface-base: #09090b;
+  --surface-elevated: #18181b;
+  --surface-overlay: #27272a;
+  --surface-hover: #27272a;
   
-  --border-subtle: #e4e4e7;
-  --border-strong: #d4d4d8;
+  --border-subtle: #27272a;
+  --border-strong: #3f3f46;
   
-  --text-primary: #09090b;
-  --text-secondary: #52525b;
-  --text-muted: #a1a1aa;
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
   
-  --brand-primary: #18181b;
-  --brand-hover: #000000;
-  --brand-subtle: #f4f4f5;
+  --brand-primary: #3b82f6;
+  --brand-hover: #60a5fa;
+  --brand-subtle: #1e3a8a;
 
-  --shadow-overlay: 0 8px 24px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
+  --shadow-overlay: 0 10px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
   --shadow-card: 0 0 0 1px var(--border-subtle);
   
   /* Tighter Density Tokens */

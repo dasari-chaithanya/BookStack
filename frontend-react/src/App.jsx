@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth, AuthProvider } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { useToast } from './components/Toast'
@@ -13,6 +13,7 @@ import LogoutModal from './components/LogoutModal'
 function AppContent() {
   const { user, loading, logout } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const { addToast } = useToast()
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
@@ -43,11 +44,14 @@ function AppContent() {
     )
   }
 
+  // Determine if we should show the Navbar (only on dashboard for logged-in users)
+  const isDashboard = location.pathname === '/dashboard'
+
   return (
     <div className="min-h-screen flex flex-col bg-surface-base text-text-primary transition-colors duration-150">
-      <Navbar onLogoutClick={() => setLogoutModalOpen(true)} />
+      {isDashboard && <Navbar onLogoutClick={() => setLogoutModalOpen(true)} />}
 
-      <main className="flex-grow pt-16">
+      <main className={`flex-grow ${isDashboard ? 'pt-16' : ''}`}>
         <Routes>
           <Route path="/"          element={!user ? <LandingPage />   : <Navigate to="/dashboard" replace />} />
           <Route path="/login"     element={!user ? <LoginPage />     : <Navigate to="/dashboard" replace />} />
