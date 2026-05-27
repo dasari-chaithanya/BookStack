@@ -12,8 +12,13 @@ class Config:
     # Clean up any whitespace/newlines accidentally pasted
     _db_uri = _db_uri.strip()
     
-    if _db_uri and _db_uri.startswith('postgres://'):
+    if _db_uri.startswith('postgres://'):
         _db_uri = _db_uri.replace('postgres://', 'postgresql://', 1)
+        
+    # If the user accidentally pasted plain text (like "Internal Database URL"), fallback to sqlite so it doesn't crash
+    if not _db_uri.startswith(('postgresql://', 'sqlite://', 'mysql://')):
+        print(f"WARNING: Invalid database URL provided: {_db_uri}. Falling back to SQLite.")
+        _db_uri = 'sqlite:///bookstack.db'
     
     SQLALCHEMY_DATABASE_URI = _db_uri
     SQLALCHEMY_TRACK_MODIFICATIONS = False
