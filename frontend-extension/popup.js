@@ -1,18 +1,10 @@
+// Configuration
+const API_URL = 'http://localhost:5000/api'; // Change to production URL on deployment
+const APP_URL = 'http://localhost:5173'; // Change to production URL on deployment
+
 let extractedMetadata = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // Theme Initialization
-  const syncStorage = await chrome.storage.sync.get(['themePreference']);
-  const currentTheme = syncStorage.themePreference || 'calm';
-  document.documentElement.setAttribute('data-theme', currentTheme);
-
-  const themeToggle = document.getElementById('theme-toggle');
-  themeToggle.addEventListener('click', () => {
-    const isFocus = document.documentElement.getAttribute('data-theme') === 'focus';
-    const newTheme = isFocus ? 'calm' : 'focus';
-    document.documentElement.setAttribute('data-theme', newTheme);
-    chrome.storage.sync.set({ themePreference: newTheme });
-  });
 
   // Onboarding & Auth Check
   const { bookstack_token, has_onboarded, last_folder_id } = await chrome.storage.local.get(['bookstack_token', 'has_onboarded', 'last_folder_id']);
@@ -21,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('main-view').classList.add('hidden');
     document.getElementById('unauth-view').classList.remove('hidden');
     document.getElementById('login-btn').addEventListener('click', () => {
-      chrome.tabs.create({ url: 'http://localhost:5173/login' });
+      chrome.tabs.create({ url: `${APP_URL}/login` });
     });
     return;
   }
@@ -53,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Fetch folders and apply Smart Memory
   try {
-    const res = await fetch('http://localhost:5000/api/folders', {
+    const res = await fetch(`${API_URL}/folders`, {
       headers: { 'Authorization': `Bearer ${bookstack_token}` }
     });
     if (res.ok) {
@@ -78,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (err) {
     if (err.message === 'Session expired') {
       showStatus('Session expired. Please log in again.', 'error');
-      setTimeout(() => chrome.tabs.create({ url: 'http://localhost:5173/login' }), 1500);
+      setTimeout(() => chrome.tabs.create({ url: `${APP_URL}/login` }), 1500);
     }
   }
 

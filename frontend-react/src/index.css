@@ -50,31 +50,7 @@
   --spacing-card-p: 1.25rem;
 }
 
-[data-theme="focus"] {
-  /* Focus Mode - deep, immersive dark mode for tight density */
-  --surface-base: #09090b;
-  --surface-elevated: #18181b;
-  --surface-overlay: #27272a;
-  --surface-hover: #27272a;
-  
-  --border-subtle: #27272a;
-  --border-strong: #3f3f46;
-  
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
-  
-  --brand-primary: #3b82f6;
-  --brand-hover: #60a5fa;
-  --brand-subtle: #1e3a8a;
 
-  --shadow-overlay: 0 10px 40px -10px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
-  --shadow-card: 0 0 0 1px var(--border-subtle);
-  
-  /* Tighter Density Tokens */
-  --spacing-container: 1rem;
-  --spacing-card-p: 1rem;
-}
 
 /* Base Resets */
 @layer base {

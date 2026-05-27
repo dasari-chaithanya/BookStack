@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:5000/api';
+// Configuration
+const API_URL = 'http://localhost:5000/api'; // Change to production URL on deployment
+const APP_URL = 'http://localhost:5173'; // Change to production URL on deployment
 
 // Listen for token updates from auth-sync.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -89,7 +91,9 @@ async function saveBookmark(metadata) {
         title: metadata.title,
         notes: metadata.description,
         favicon_url: metadata.favicon_url,
-        image_url: metadata.image_url
+        image_url: metadata.image_url,
+        tags: metadata.tags || [],
+        folder_id: metadata.folder_id || null
       })
     });
 

@@ -5,11 +5,9 @@ import {
   FiBookmark, FiChevronDown, FiLogOut, FiMenu, FiX, FiGrid, FiMoon, FiSun
 } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
-import { useTheme } from '../context/ThemeContext'
 
 export default function Navbar({ onLogoutClick }) {
   const { user } = useAuth()
-  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -62,15 +60,6 @@ export default function Navbar({ onLogoutClick }) {
             {/* ── Right section (desktop) ── */}
             <div className="hidden md:flex items-center gap-4">
               
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className="btn-icon flex items-center gap-2"
-                aria-label="Toggle Theme"
-              >
-                {theme === 'focus' ? <FiMoon className="w-4 h-4" /> : <FiSun className="w-4 h-4" />}
-              </button>
-
               {!user ? (
                 <div className="flex items-center gap-2">
                   <Link to="/login" className="btn-secondary border-transparent">
@@ -134,9 +123,6 @@ export default function Navbar({ onLogoutClick }) {
 
             {/* ── Mobile hamburger ── */}
             <div className="flex md:hidden items-center gap-2">
-              <button onClick={toggleTheme} className="btn-icon">
-                {theme === 'focus' ? <FiMoon className="w-4 h-4" /> : <FiSun className="w-4 h-4" />}
-              </button>
               <button
                 className="btn-icon"
                 onClick={() => setMobileOpen((o) => !o)}

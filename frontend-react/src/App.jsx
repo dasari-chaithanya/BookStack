@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth, AuthProvider } from './context/AuthContext'
-import { ThemeProvider } from './context/ThemeContext'
 import { useToast } from './components/Toast'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -77,11 +76,9 @@ function AppContent() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   )
 }
 
