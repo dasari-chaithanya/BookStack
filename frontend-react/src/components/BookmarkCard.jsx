@@ -1,26 +1,38 @@
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FiCopy, FiExternalLink, FiEdit2, FiTrash2, FiLink } from 'react-icons/fi'
+import { FiCopy, FiExternalLink, FiEdit2, FiTrash2, FiLink, FiMoreVertical } from 'react-icons/fi'
 import { useToast } from './Toast'
-
-function getFaviconUrl(url) {
-  try {
-    const domain = new URL(url).hostname
-    return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`
-  } catch {
-    return null
-  }
-}
-
-function getDomainName(url) {
-  try {
-    return new URL(url).hostname.replace('www.', '')
-  } catch {
-    return url
-  }
-}
+import { getFaviconUrl, getDomainName } from '../utils/formatters'
 
 export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
   const { addToast } = useToast()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef(null)
+  const menuBtnRef = useRef(null)
+
+  // Close dropdown on outside click or Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && menuOpen) {
+        setMenuOpen(false)
+        menuBtnRef.current?.focus()
+      }
+    }
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target) && !menuBtnRef.current?.contains(e.target)) {
+        setMenuOpen(false)
+      }
+    }
+
+    if (menuOpen) {
+      document.addEventListener('keydown', handleKeyDown)
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuOpen])
 
   const handleCopy = () => {
     navigator.clipboard.writeText(bookmark.url)
@@ -35,6 +47,11 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
   const favicon = bookmark.favicon_url || getFaviconUrl(bookmark.url)
   const domain = getDomainName(bookmark.url)
 
+  // Tag truncation
+  const maxTags = 3
+  const visibleTags = bookmark.tags ? bookmark.tags.slice(0, maxTags) : []
+  const remainingTags = bookmark.tags ? bookmark.tags.length - maxTags : 0
+
   return (
     <motion.div
       layout
@@ -43,17 +60,18 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.3 }}
       whileHover={{ y: -4 }}
+      className="bg-white rounded-2xl border border-blue-50 overflow-hidden flex flex-col h-full card-shadow hover:card-shadow-hover transition-all duration-300 relative group"
     >
       {/* Top accent bar or Preview Image */}
       {bookmark.image_url ? (
-        <div className="h-32 w-full overflow-hidden bg-gray-100 border-b border-blue-50">
+        <div className="h-32 w-full overflow-hidden bg-gray-100 border-b border-blue-50 flex-shrink-0">
           <img src={bookmark.image_url} alt="Preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
         </div>
       ) : (
-        <div className="h-1 bg-gradient-to-r from-blue-500 to-cyan-400" />
+        <div className="h-1 bg-gradient-to-r from-blue-500 to-cyan-400 flex-shrink-0" />
       )}
 
-      <div className="p-5 flex flex-col gap-3 flex-1">
+      <div className="p-5 flex flex-col gap-3 flex-1 min-h-0">
         {/* Header: favicon + title */}
         <div className="flex items-start gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
@@ -94,10 +112,15 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
 
         {/* Tags */}
         {bookmark.tags && bookmark.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 overflow-hidden">
-            {bookmark.tags.map((tag) => (
-              <span key={tag} className="tag-pill max-w-full truncate inline-block" title={tag}>{tag}</span>
+          <div className="flex items-center gap-1.5 overflow-hidden flex-wrap">
+            {visibleTags.map((tag) => (
+              <span key={tag} className="tag-pill max-w-[120px] truncate" title={tag}>{tag}</span>
             ))}
+            {remainingTags > 0 && (
+              <span className="tag-pill bg-gray-50 text-gray-500 border-gray-200">
+                +{remainingTags}
+              </span>
+            )}
           </div>
         )}
 
@@ -105,11 +128,12 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
         <div className="flex-1" />
 
         {/* Action buttons */}
-        <div className="flex items-center gap-1.5 pt-2 border-t border-gray-50">
+        <div className="flex items-center gap-1.5 pt-3 border-t border-gray-50 mt-auto">
           <button
             onClick={handleCopy}
             title="Copy URL"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200"
+            aria-label="Copy URL"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-blue-600 hover:bg-blue-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-400 outline-none"
           >
             <FiCopy className="w-3.5 h-3.5" />
             Copy
@@ -117,28 +141,55 @@ export default function BookmarkCard({ bookmark, onEdit, onDelete }) {
           <button
             onClick={handleVisit}
             title="Visit URL"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200"
+            aria-label="Visit URL"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-emerald-600 hover:bg-emerald-50 transition-all duration-200 focus-visible:ring-2 focus-visible:ring-emerald-400 outline-none"
           >
             <FiExternalLink className="w-3.5 h-3.5" />
             Visit
           </button>
+          
           <div className="flex-1" />
-          <button
-            onClick={() => onEdit(bookmark)}
-            title="Edit"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-amber-600 hover:bg-amber-50 transition-all duration-200"
-          >
-            <FiEdit2 className="w-3.5 h-3.5" />
-            Edit
-          </button>
-          <button
-            onClick={() => onDelete(bookmark)}
-            title="Delete"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-gray-500 hover:text-red-600 hover:bg-red-50 transition-all duration-200"
-          >
-            <FiTrash2 className="w-3.5 h-3.5" />
-            Delete
-          </button>
+          
+          {/* Three-dot menu */}
+          <div className="relative">
+            <button
+              ref={menuBtnRef}
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="More actions"
+              aria-expanded={menuOpen}
+              className={`p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors focus-visible:ring-2 focus-visible:ring-gray-300 outline-none ${menuOpen ? 'bg-gray-100 text-gray-600' : ''}`}
+            >
+              <FiMoreVertical className="w-4 h-4" />
+            </button>
+            
+            <AnimatePresence>
+              {menuOpen && (
+                <motion.div
+                  ref={menuRef}
+                  initial={{ opacity: 0, scale: 0.95, y: 4 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute right-0 bottom-full mb-1 w-32 bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden py-1 z-10 origin-bottom-right"
+                >
+                  <button
+                    onClick={() => { setMenuOpen(false); onEdit(bookmark) }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-amber-50 hover:text-amber-600 transition-colors text-left focus-visible:bg-amber-50 outline-none"
+                  >
+                    <FiEdit2 className="w-3.5 h-3.5" />
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => { setMenuOpen(false); onDelete(bookmark.id) }}
+                    className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-colors text-left focus-visible:bg-red-50 outline-none"
+                  >
+                    <FiTrash2 className="w-3.5 h-3.5" />
+                    Delete
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </motion.div>

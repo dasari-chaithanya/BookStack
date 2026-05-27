@@ -52,12 +52,13 @@ export default function BookmarkModal({ isOpen, onClose, onSave, editData = null
       setMetadataSuccess(false)
       try {
         const res = await client.get(`/api/metadata?url=${encodeURIComponent(form.url)}`)
+        const meta = res.data.data || {}
         setForm(prev => ({
           ...prev,
-          title: prev.title || res.data.title || '',
-          description: prev.description || res.data.description || '',
-          favicon_url: res.data.favicon_url || '',
-          image_url: res.data.image_url || ''
+          title: prev.title || meta.title || '',
+          description: prev.description || meta.description || '',
+          favicon_url: meta.favicon_url || '',
+          image_url: meta.image_url || ''
         }))
         setMetadataSuccess(true)
       } catch (err) {

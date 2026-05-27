@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Save to BookStack</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+      </div>
+      <h2>BookStack</h2>
+    </div>
+
+    <div id="unauth-view" class="hidden">
+      <p>Please log into the BookStack web app first.</p>
+      <button id="login-btn">Open Web App</button>
+    </div>
+
+    <div id="main-view">
+      <div class="input-group">
+        <label>URL</label>
+        <input type="text" id="url" readonly>
+      </div>
+      <div class="input-group">
+        <label>Title</label>
+        <input type="text" id="title">
+      </div>
+      <div class="input-group">
+        <label>Description</label>
+        <textarea id="description" rows="2"></textarea>
+      </div>
+      
+      <div class="input-group">
+        <label>Folder</label>
+        <select id="folder" disabled>
+          <option>Inbox (Default)</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label>Tags (comma separated)</label>
+        <input type="text" id="tags" placeholder="react, tutorial, video">
+      </div>
+      
+      <div id="status-banner" class="status-banner hidden"></div>
+      
+      <div class="actions">
+        <button id="save-btn" class="primary">Save Bookmark (Enter)</button>
+        <button id="dashboard-btn" class="secondary" style="margin-top: 8px;">Open Dashboard</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,11 +1,57 @@
 import { useAuth } from '../context/AuthContext'
 import { motion } from 'framer-motion'
-import { FiUser, FiMail, FiCalendar, FiDownload, FiMoon, FiTrash2, FiLogOut } from 'react-icons/fi'
+import { FiUser, FiMail, FiCalendar, FiDownload, FiUpload, FiMoon, FiTrash2, FiLogOut } from 'react-icons/fi'
 import { useToast } from '../components/Toast'
+import client from '../api/client'
+import { useRef } from 'react'
 
 export default function SettingsPage() {
   const { user, logout } = useAuth()
-  const { showToast } = useToast()
+  const { addToast } = useToast()
+  const fileInputRef = useRef(null)
+
+  const handleExport = async () => {
+    try {
+      addToast('Exporting bookmarks...', 'info')
+      const res = await client.get('/api/export')
+      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: 'application/json' })
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `bookstack_export_${new Date().toISOString().split('T')[0]}.json`
+      a.click()
+      window.URL.revokeObjectURL(url)
+      addToast('Export completed successfully!', 'success')
+    } catch (err) {
+      addToast('Failed to export bookmarks.', 'error')
+    }
+  }
+
+  const handleImport = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    
+    if (!file.name.endsWith('.html')) {
+      addToast('Only HTML bookmark files are supported.', 'error')
+      return
+    }
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      addToast('Importing bookmarks... This may take a moment.', 'info')
+      const res = await client.post('/api/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      const summary = res.data.data
+      addToast(`Imported ${summary.imported}. Skipped ${summary.skipped_duplicates} duplicates.`, 'success')
+    } catch (err) {
+      addToast('Failed to import bookmarks.', 'error')
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   return (
     <div className="pt-24 pb-20 px-4 max-w-4xl mx-auto min-h-screen">
@@ -58,22 +104,39 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Data Placeholder */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-50">
               <h3 className="text-lg font-semibold text-gray-800 mb-4">Your Data</h3>
-              <div className="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50/50">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                    <FiDownload className="w-5 h-5" />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                      <FiDownload className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800 text-sm">Export Bookmarks</p>
+                      <p className="text-xs text-gray-500">Download your data as JSON</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-800 text-sm">Export Bookmarks</p>
-                    <p className="text-xs text-gray-500">Download your data as JSON/CSV</p>
-                  </div>
+                  <button onClick={handleExport} className="px-4 py-1.5 rounded-full bg-blue-100 hover:bg-blue-200 transition-colors text-blue-600 text-xs font-semibold cursor-pointer">
+                    Export JSON
+                  </button>
                 </div>
-                <button disabled className="px-4 py-1.5 rounded-full bg-blue-100 text-blue-400 text-xs font-semibold cursor-not-allowed">
-                  Coming Soon
-                </button>
+                
+                <div className="flex items-center justify-between p-4 border border-gray-100 rounded-xl bg-gray-50/50">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                      <FiUpload className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-800 text-sm">Import Bookmarks</p>
+                      <p className="text-xs text-gray-500">Import from HTML file</p>
+                    </div>
+                  </div>
+                  <input type="file" ref={fileInputRef} onChange={handleImport} accept=".html" className="hidden" />
+                  <button onClick={() => fileInputRef.current?.click()} className="px-4 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 transition-colors text-indigo-600 text-xs font-semibold cursor-pointer">
+                    Upload HTML
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -86,7 +149,7 @@ export default function SettingsPage() {
               <button 
                 onClick={() => {
                   logout();
-                  showToast('Logged out successfully', 'success')
+                  addToast('Logged out successfully', 'success')
                 }}
                 className="w-full flex items-center justify-center gap-2 py-2.5 mb-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors text-sm font-medium"
               >
@@ -99,7 +162,7 @@ export default function SettingsPage() {
                   Once you delete your account, there is no going back. Please be certain.
                 </p>
                 <button 
-                  onClick={() => showToast('Account deletion is not available in this preview', 'error')}
+                  onClick={() => addToast('Account deletion is not available in this preview', 'error')}
                   className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-100 transition-colors text-sm font-medium border border-red-200"
                 >
                   <FiTrash2 className="w-4 h-4" />

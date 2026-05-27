@@ -7,3 +7,7 @@ Flask-JWT-Extended
 cryptography
 requests
 beautifulsoup4
+Flask-Migrate
+Flask-Limiter
+pytest
+python-dotenv
