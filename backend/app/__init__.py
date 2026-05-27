@@ -41,23 +41,24 @@ def create_app(config_class=Config):
         try:
             db.create_all()
             
-            # Safely add missing columns if the bookmarks table already existed
+            # Safely add missing columns if the tables already existed
             from sqlalchemy import text
             columns_to_add = [
-                ("favicon_url", "VARCHAR(500)"),
-                ("image_url", "VARCHAR(500)"),
-                ("folder_id", "INTEGER"),
-                ("is_favorite", "BOOLEAN DEFAULT 0"),
-                ("is_archived", "BOOLEAN DEFAULT 0"),
-                ("last_opened_at", "DATETIME"),
-                ("visit_count", "INTEGER DEFAULT 0"),
-                ("source", "VARCHAR(20) DEFAULT 'manual'"),
-                ("content_type", "VARCHAR(20) DEFAULT 'other'"),
-                ("deleted_at", "DATETIME")
+                ("bookmarks", "favicon_url", "VARCHAR(500)"),
+                ("bookmarks", "image_url", "VARCHAR(500)"),
+                ("bookmarks", "folder_id", "INTEGER"),
+                ("bookmarks", "is_favorite", "BOOLEAN DEFAULT 0"),
+                ("bookmarks", "is_archived", "BOOLEAN DEFAULT 0"),
+                ("bookmarks", "last_opened_at", "DATETIME"),
+                ("bookmarks", "visit_count", "INTEGER DEFAULT 0"),
+                ("bookmarks", "source", "VARCHAR(20) DEFAULT 'manual'"),
+                ("bookmarks", "content_type", "VARCHAR(20) DEFAULT 'other'"),
+                ("bookmarks", "deleted_at", "DATETIME"),
+                ("users", "email", "VARCHAR(120)")
             ]
-            for col, col_type in columns_to_add:
+            for table_name, col, col_type in columns_to_add:
                 try:
-                    db.session.execute(text(f"ALTER TABLE bookmarks ADD COLUMN {col} {col_type}"))
+                    db.session.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col} {col_type}"))
                     db.session.commit()
                 except Exception:
                     db.session.rollback() # Column likely already exists
