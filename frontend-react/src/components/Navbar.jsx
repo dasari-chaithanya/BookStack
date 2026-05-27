@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FiBookmark, FiChevronDown, FiLogOut, FiMenu, FiX, FiGrid, FiMoon, FiSun
+  FiBookmark, FiUser, FiChevronDown,
+  FiLogOut, FiSettings, FiMenu, FiX, FiGrid
 } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
 
@@ -40,77 +41,99 @@ export default function Navbar({ onLogoutClick }) {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 bg-surface-overlay/80 backdrop-blur-md border-b transition-all duration-300 ${
-          scrolled ? 'border-border-strong shadow-overlay' : 'border-border-subtle'
+        className={`fixed top-0 left-0 right-0 z-50 bg-white/95 navbar-blur border-b border-blue-50 transition-all duration-300 ${
+          scrolled ? 'shadow-lg shadow-blue-50/60' : 'shadow-sm'
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center h-16 gap-4">
 
             {/* ── Logo ── */}
-            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 flex-shrink-0 group outline-none">
-              <div className="w-8 h-8 rounded-lg bg-brand-primary flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform duration-150">
-                <FiBookmark className="w-4 h-4" />
+            <Link to={user ? '/dashboard' : '/'} className="flex items-center gap-2.5 flex-shrink-0 group">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-md group-hover:shadow-blue-300 transition-shadow duration-300">
+                <FiBookmark className="w-5 h-5 text-white" />
               </div>
-              <span className="text-lg font-bold text-text-primary tracking-tight">
+              <span className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors duration-200">
                 BookStack
               </span>
             </Link>
 
+            {/* Spacer */}
+            <div className="flex-1" />
+
             {/* ── Right section (desktop) ── */}
-            <div className="hidden md:flex items-center gap-4">
-              
+            <div className="hidden md:flex items-center gap-3">
               {!user ? (
-                <div className="flex items-center gap-2">
-                  <Link to="/login" className="btn-secondary border-transparent">
+                <>
+                  <Link
+                    to="/login"
+                    className="px-4 py-2 text-sm font-semibold text-blue-600 hover:text-blue-700 rounded-xl hover:bg-blue-50 transition-all duration-200"
+                  >
                     Login
                   </Link>
-                  <Link to="/register" className="btn-primary">
+                  <Link
+                    to="/register"
+                    className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md hover:shadow-blue-300 transition-all duration-200"
+                  >
                     Register
                   </Link>
-                </div>
+                </>
               ) : (
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setDropdownOpen((o) => !o)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-hover transition-colors duration-150 outline-none"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-blue-50 transition-all duration-200 group"
                   >
-                    <div className="w-7 h-7 rounded-full bg-brand-subtle flex items-center justify-center text-brand-primary text-xs font-bold uppercase">
-                      {user.username?.[0] ?? 'U'}
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-sm">
+                      <span className="text-white text-xs font-bold uppercase">
+                        {user.username?.[0] ?? 'U'}
+                      </span>
                     </div>
+                    <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900 max-w-[120px] truncate">
+                      {user.username}
+                    </span>
                     <FiChevronDown
-                      className={`w-4 h-4 text-text-muted transition-transform duration-150 ${dropdownOpen ? 'rotate-180' : ''}`}
+                      className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${dropdownOpen ? 'rotate-180' : ''}`}
                     />
                   </button>
 
                   <AnimatePresence>
                     {dropdownOpen && (
                       <motion.div
-                        initial={{ opacity: 0, y: -4, scale: 0.98 }}
+                        initial={{ opacity: 0, y: -8, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
-                        exit={{ opacity: 0, y: -4, scale: 0.98 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="absolute right-0 mt-2 w-56 bg-surface-overlay rounded-xl shadow-overlay border border-border-strong overflow-hidden p-1 z-50"
+                        exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-blue-50 overflow-hidden py-1.5"
                       >
-                        <div className="px-3 py-2.5 mb-1">
-                          <p className="text-sm font-semibold text-text-primary truncate">{user.username}</p>
-                          <p className="text-xs text-text-muted truncate">{user.email}</p>
+                        {/* User info header */}
+                        <div className="px-4 py-2.5 border-b border-gray-50 mb-1">
+                          <p className="text-sm font-semibold text-gray-900">{user.username}</p>
+                          <p className="text-xs text-gray-400">Signed in</p>
                         </div>
-                        
-                        <div className="h-px bg-border-subtle my-1 mx-2" />
 
                         <button
                           onClick={() => { setDropdownOpen(false); navigate('/dashboard') }}
-                          className="menu-item"
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors duration-150"
                         >
                           <FiGrid className="w-4 h-4" /> Dashboard
                         </button>
-                        
-                        <div className="h-px bg-border-subtle my-1 mx-2" />
-                        
+                        <button
+                          disabled
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed opacity-60"
+                        >
+                          <FiUser className="w-4 h-4" /> Profile
+                        </button>
+                        <button
+                          disabled
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-gray-400 cursor-not-allowed opacity-60"
+                        >
+                          <FiSettings className="w-4 h-4" /> Settings
+                        </button>
+                        <div className="my-1 border-t border-gray-100" />
                         <button
                           onClick={() => { setDropdownOpen(false); onLogoutClick?.() }}
-                          className="menu-item-danger"
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors duration-150"
                         >
                           <FiLogOut className="w-4 h-4" /> Sign out
                         </button>
@@ -122,15 +145,15 @@ export default function Navbar({ onLogoutClick }) {
             </div>
 
             {/* ── Mobile hamburger ── */}
-            <div className="flex md:hidden items-center gap-2">
-              <button
-                className="btn-icon"
-                onClick={() => setMobileOpen((o) => !o)}
-                aria-label="Toggle menu"
-              >
-                {mobileOpen ? <FiX className="w-5 h-5" /> : <FiMenu className="w-5 h-5" />}
-              </button>
-            </div>
+            <button
+              className="md:hidden p-2 rounded-xl hover:bg-blue-50 transition-colors duration-200"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen
+                ? <FiX className="w-5 h-5 text-gray-700" />
+                : <FiMenu className="w-5 h-5 text-gray-700" />}
+            </button>
           </div>
         </div>
       </nav>
@@ -139,37 +162,44 @@ export default function Navbar({ onLogoutClick }) {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: -12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-16 left-0 right-0 z-40 bg-surface-overlay border-b border-border-strong shadow-overlay px-4 py-4 md:hidden overflow-hidden"
+            className="fixed top-16 left-0 right-0 z-40 bg-white border-b border-blue-100 shadow-xl px-4 py-4 md:hidden"
           >
             {!user ? (
               <div className="flex flex-col gap-2">
-                <Link to="/login" className="btn-secondary w-full">Login</Link>
-                <Link to="/register" className="btn-primary w-full">Register</Link>
+                <Link to="/login"
+                  className="py-3 text-center text-sm font-semibold text-blue-600 border border-blue-200 rounded-xl hover:bg-blue-50 transition-colors">
+                  Login
+                </Link>
+                <Link to="/register"
+                  className="py-3 text-center text-sm font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-colors">
+                  Register
+                </Link>
               </div>
             ) : (
               <div className="flex flex-col gap-1">
-                <div className="flex items-center gap-3 px-3 py-3 mb-2 bg-surface-hover rounded-xl">
-                  <div className="w-9 h-9 rounded-full bg-brand-subtle flex items-center justify-center flex-shrink-0 text-brand-primary text-sm font-bold uppercase">
-                    {user.username?.[0]}
+                <div className="flex items-center gap-3 px-3 py-3 mb-1 bg-blue-50 rounded-2xl">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center flex-shrink-0">
+                    <span className="text-white text-sm font-bold uppercase">{user.username?.[0]}</span>
                   </div>
-                  <div className="overflow-hidden">
-                    <p className="text-sm font-semibold text-text-primary truncate">{user.username}</p>
-                    <p className="text-xs text-text-muted truncate">{user.email}</p>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{user.username}</p>
+                    <p className="text-xs text-gray-500">Signed in</p>
                   </div>
                 </div>
                 <button
                   onClick={() => { setMobileOpen(false); navigate('/dashboard') }}
-                  className="menu-item"
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-gray-700 hover:bg-blue-50 rounded-xl transition-colors font-medium"
                 >
                   <FiGrid className="w-4 h-4" /> Dashboard
                 </button>
+                <div className="my-1 border-t border-gray-100" />
                 <button
                   onClick={() => { setMobileOpen(false); onLogoutClick?.() }}
-                  className="menu-item-danger"
+                  className="flex items-center gap-3 px-3 py-2.5 text-sm text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium"
                 >
                   <FiLogOut className="w-4 h-4" /> Sign out
                 </button>

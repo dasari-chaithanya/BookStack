@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth, AuthProvider } from './context/AuthContext'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { useAuth } from './context/AuthContext'
 import { useToast } from './components/Toast'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
@@ -9,10 +9,9 @@ import DashboardPage from './pages/DashboardPage'
 import Navbar from './components/Navbar'
 import LogoutModal from './components/LogoutModal'
 
-function AppContent() {
+function App() {
   const { user, loading, logout } = useAuth()
   const navigate = useNavigate()
-  const location = useLocation()
   const { addToast } = useToast()
   const [logoutModalOpen, setLogoutModalOpen] = useState(false)
 
@@ -30,35 +29,30 @@ function AppContent() {
   // Show a simple spinner while checking session
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface-base">
+      <div className="min-h-screen bg-[#eaf7fb] flex items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center shadow-md animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center shadow-lg animate-pulse">
             <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
               <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
             </svg>
           </div>
-          <p className="text-sm text-text-muted font-medium">Loading BookStack...</p>
+          <p className="text-sm text-gray-400 font-medium">Loading BookStack...</p>
         </div>
       </div>
     )
   }
 
-  // Determine if we should show the Navbar (only on dashboard for logged-in users)
-  const isDashboard = location.pathname === '/dashboard'
-
   return (
-    <div className="min-h-screen flex flex-col bg-surface-base text-text-primary transition-colors duration-150">
-      {isDashboard && <Navbar onLogoutClick={() => setLogoutModalOpen(true)} />}
+    <div className="min-h-screen bg-[#eaf7fb] text-gray-900 font-sans">
+      <Navbar onLogoutClick={() => setLogoutModalOpen(true)} />
 
-      <main className={`flex-grow ${isDashboard ? 'pt-16' : ''}`}>
-        <Routes>
-          <Route path="/"          element={!user ? <LandingPage />   : <Navigate to="/dashboard" replace />} />
-          <Route path="/login"     element={!user ? <LoginPage />     : <Navigate to="/dashboard" replace />} />
-          <Route path="/register"  element={!user ? <RegisterPage />  : <Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={user  ? <DashboardPage /> : <Navigate to="/login"    replace />} />
-          <Route path="*"          element={<Navigate to="/"          replace />} />
-        </Routes>
-      </main>
+      <Routes>
+        <Route path="/"          element={!user ? <LandingPage />   : <Navigate to="/dashboard" replace />} />
+        <Route path="/login"     element={!user ? <LoginPage />     : <Navigate to="/dashboard" replace />} />
+        <Route path="/register"  element={!user ? <RegisterPage />  : <Navigate to="/dashboard" replace />} />
+        <Route path="/dashboard" element={user  ? <DashboardPage /> : <Navigate to="/login"    replace />} />
+        <Route path="*"          element={<Navigate to="/"          replace />} />
+      </Routes>
 
       <LogoutModal
         isOpen={logoutModalOpen}
@@ -71,14 +65,6 @@ function AppContent() {
         }}
       />
     </div>
-  )
-}
-
-function App() {
-  return (
-    <AuthProvider>
-      <AppContent />
-    </AuthProvider>
   )
 }
 
