@@ -1,6 +1,6 @@
 // Configuration
-const API_URL = 'http://localhost:5000/api'; // Change to production URL on deployment
-const APP_URL = 'http://localhost:5173'; // Change to production URL on deployment
+const API_URL = 'https://bookstack-api-0ir4.onrender.com/api'; // Change to production URL on deployment
+const APP_URL = 'https://bookstack-web.onrender.com'; // Change to production URL on deployment
 
 // Listen for token updates from auth-sync.js
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {

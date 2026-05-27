@@ -15,10 +15,8 @@
     "contextMenus"
   ],
   "host_permissions": [
-    "http://localhost:5000/*",
-    "http://127.0.0.1:5000/*",
-    "http://localhost:5173/*",
-    "http://localhost:5174/*"
+    "https://bookstack-api-0ir4.onrender.com/*",
+    "https://bookstack-web.onrender.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -34,7 +32,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["http://localhost:5173/*", "http://localhost:5174/*", "http://127.0.0.1:5173/*", "*://*.bookstack.com/*"],
+      "matches": ["https://bookstack-web.onrender.com/*", "*://*.bookstack.com/*"],
       "js": ["content/auth-sync.js"]
     }
   ],
