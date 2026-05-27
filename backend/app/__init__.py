@@ -40,8 +40,29 @@ def create_app(config_class=Config):
     with app.app_context():
         try:
             db.create_all()
+            
+            # Safely add missing columns if the bookmarks table already existed
+            from sqlalchemy import text
+            columns_to_add = [
+                ("favicon_url", "VARCHAR(500)"),
+                ("image_url", "VARCHAR(500)"),
+                ("folder_id", "INTEGER"),
+                ("is_favorite", "BOOLEAN DEFAULT 0"),
+                ("is_archived", "BOOLEAN DEFAULT 0"),
+                ("last_opened_at", "DATETIME"),
+                ("visit_count", "INTEGER DEFAULT 0"),
+                ("source", "VARCHAR(20) DEFAULT 'manual'"),
+                ("content_type", "VARCHAR(20) DEFAULT 'other'"),
+                ("deleted_at", "DATETIME")
+            ]
+            for col, col_type in columns_to_add:
+                try:
+                    db.session.execute(text(f"ALTER TABLE bookmarks ADD COLUMN {col} {col_type}"))
+                    db.session.commit()
+                except Exception:
+                    db.session.rollback() # Column likely already exists
         except Exception as e:
-            print(f"Failed to create tables: {e}")
+            print(f"Failed to create or update tables: {e}")
 
     return app
 
