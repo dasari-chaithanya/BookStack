@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Calm Theme Variables (Default) */
+  /* Theme Variables */
   --bg-main: #ffffff;
   --bg-secondary: #f9fafb;
   --bg-hover: #f3f4f6;
@@ -16,23 +16,8 @@
   --speed: 150ms; /* Fast transitions */
 }
 
-[data-theme="focus"] {
-  /* Focus Theme Variables */
-  --bg-main: #fafafa;
-  --bg-secondary: #f4f4f5;
-  --bg-hover: #e4e4e7;
-  --text-main: #09090b;
-  --text-muted: #71717a;
-  --border-color: #d4d4d8;
-  --accent: #18181b; /* High contrast black/dark grey */
-  --accent-hover: #000000;
-  --shadow-sm: none;
-  --shadow-md: 0 2px 4px rgba(0,0,0,0.05);
-  --ring: rgba(24, 24, 27, 0.2);
-}
-
 body {
-  width: min(380px, 96vw);
+  width: 380px;
   margin: 0;
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--text-main);
