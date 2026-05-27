@@ -1,7 +1,7 @@
 // metadata-extractor.js
 // Scrapes the current page for title, description, and favicon.
 
-function getMetadata() {
+(() => {
   const title = document.title || '';
   
   let description = '';
@@ -31,6 +31,4 @@ function getMetadata() {
     favicon_url,
     image_url
   };
-}
-
-getMetadata();
+})();
