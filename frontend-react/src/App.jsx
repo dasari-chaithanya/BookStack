@@ -30,7 +30,7 @@ function AppContent() {
   // Show a simple spinner while checking session
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-surface-base">
         <div className="flex flex-col items-center gap-4">
           <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center shadow-md animate-pulse">
             <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -44,7 +44,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-surface-base text-text-primary transition-colors duration-150">
       <Navbar onLogoutClick={() => setLogoutModalOpen(true)} />
 
       <main className="flex-grow pt-16">
