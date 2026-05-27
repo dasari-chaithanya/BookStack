@@ -10,4 +10,4 @@ beautifulsoup4
 Flask-Migrate
 Flask-Limiter
 pytest
-python-dotenv
+python-dotenvgunicorn
