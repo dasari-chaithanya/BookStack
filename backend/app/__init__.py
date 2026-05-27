@@ -14,13 +14,6 @@ def create_app(config_class=Config):
     limiter.init_app(app)
     cors.init_app(app, origins=app.config['CORS_ORIGINS'])
 
-    # Ensure database tables are created when booting on Render
-    with app.app_context():
-        try:
-            db.create_all()
-        except Exception as e:
-            print(f"Failed to create tables: {e}")
-
     # Configure Logging
     configure_logging(app)
 
@@ -42,6 +35,13 @@ def create_app(config_class=Config):
     @limiter.exempt
     def health_check():
         return jsonify({"status": "ok"}), 200
+
+    # Ensure database tables are created when booting on Render
+    with app.app_context():
+        try:
+            db.create_all()
+        except Exception as e:
+            print(f"Failed to create tables: {e}")
 
     return app
 
