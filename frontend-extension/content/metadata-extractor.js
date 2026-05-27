@@ -20,8 +20,23 @@
 
   let image_url = '';
   const ogImage = document.querySelector('meta[property="og:image"]');
+  const twitterImage = document.querySelector('meta[name="twitter:image"]');
+  const appleIcon = document.querySelector('link[rel="apple-touch-icon"]');
+
   if (ogImage && ogImage.content) {
     image_url = new URL(ogImage.content, window.location.origin).href;
+  } else if (twitterImage && twitterImage.content) {
+    image_url = new URL(twitterImage.content, window.location.origin).href;
+  } else if (appleIcon && appleIcon.href) {
+    // Some sites use their apple touch icon as a good fallback preview
+    image_url = appleIcon.href;
+  } else {
+    // As a last resort, try to find the largest image on the page
+    const images = Array.from(document.querySelectorAll('img'))
+      .filter(img => img.width > 200 && img.height > 200 && img.src);
+    if (images.length > 0) {
+      image_url = images[0].src;
+    }
   }
 
   return {
